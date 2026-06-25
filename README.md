@@ -34,6 +34,9 @@ id equals the registered id.
 | `noise`   | radial scan noise on the surface         | same (100%)     |
 | `stretch` | a genuinely different object (z-stretch) | different (0%)  |
 | `tamper`  | a local bump, the forgery probe          | gray, no verdict|
+| `steer`   | an assembly sub-part rotated in place    | gray, no verdict|
+| `displace`| an assembly sub-part slid to a new spot  | gray, no verdict|
+| `partscale`| an assembly sub-part resized            | gray, no verdict|
 
 `control` doubles as the in-run determinism canary. Anything under 100% there
 means the bench itself drifted, not the algorithm.
@@ -97,6 +100,26 @@ only a hand-reviewed summary in git, or pin one CSV as a release snapshot.
 The summary groups every variant by `(kind, magnitude)` and prints `n`, `ok`,
 `err`, and `id-kept%`. Read it against the expectation column: `same` rows want
 100%, `different` rows want 0%, `gray` rows are a curve you watch, not a gate.
+
+### CSV columns
+
+The CSV behind that summary has one row per base and per variant:
+
+| Column        | Meaning                                                         |
+| ------------- | --------------------------------------------------------------- |
+| `shape`       | a star shape (`rock0`…) or an assembly (`car`, `car_bigwheel`)  |
+| `kind`        | the perturbation family (`base`, `control`, `steer`, …)         |
+| `label`       | the specific variant, e.g. `steer_15deg`, `displace_0.1`        |
+| `magnitude`   | the kind's numeric knob (degrees, offset, or scale factor)      |
+| `expectation` | `same`, `different`, `gray`, or `-` on base rows                |
+| `outcome`     | `ok`, `rejected` (shape gate), or `error`                       |
+| `elapsed_ms`  | register or verify time for that row, in milliseconds           |
+| `id_kept`     | `1` recovered the base id, `0` did not, empty on base rows      |
+
+`id_kept` is the column that matters. `1` means the perturbed mesh still verifies
+as the same identity. `0` means it landed on a new one. `elapsed_ms` sits right
+before it, so the last two numbers on a row are timing then identity. Do not
+mistake the timing for the verdict.
 
 ## Drift mode
 

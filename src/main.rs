@@ -1,3 +1,4 @@
+mod assembly;
 mod corpus;
 mod drift;
 mod hashing;
